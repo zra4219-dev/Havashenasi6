@@ -57,13 +57,30 @@ jobs:
             's#androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0#androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0#g' \
             "$BUILD_FILE"
 
-          echo "Lifecycle dependencies after compatibility fix:"
           grep "androidx.lifecycle" "$BUILD_FILE"
 
-          if grep -q 'androidx.lifecycle:.*:2.11.0' "$BUILD_FILE"; then
-            echo "Lifecycle 2.11.0 is still present."
+      - name: Fix Compose background source
+        shell: bash
+        run: |
+          set -e
+
+          SOURCE_FILE="$PROJECT_DIR/app/src/main/java/ir/havashenasi6/app/ui/components/LiveWeatherBackground.kt"
+
+          if [ ! -f "$SOURCE_FILE" ]; then
+            echo "LiveWeatherBackground.kt was not found."
             exit 1
           fi
+
+          sed -i \
+            's#import androidx.compose.foundation.layout.matchParentSize#import androidx.compose.foundation.layout.fillMaxSize#g' \
+            "$SOURCE_FILE"
+
+          sed -i \
+            's#Modifier.matchParentSize()#Modifier.fillMaxSize()#g' \
+            "$SOURCE_FILE"
+
+          echo "Source compatibility fix applied:"
+          grep -n "fillMaxSize" "$SOURCE_FILE"
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
